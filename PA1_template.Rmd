@@ -23,13 +23,17 @@ into a proper `Date` object.
 
 #### Calculate the daily totals
 
-Calculation of the daily sums is as simple as aggregating the steps by date.
+Calculation of the daily sums is as simple as aggregating the steps by date. Also compute the median
+and the average here.
 
 ```{r echo=TRUE}
     library(plyr)
 
     dailysteps <- aggregate(steps ~ date, data = activity, FUN = sum, na.action = na.omit)
     names(dailysteps) <- c("date", "total_steps")
+
+    dailysteps.mean <- mean(dailysteps$total_steps)
+    dailysteps.median <- median(dailysteps$total_steps)
 ```
 
 #### Create a histogram plot of the totals
@@ -45,14 +49,9 @@ We'll use color to highlight concentration rather than overlay a density curve.
         geom_rug() + 
         ggtitle("Total Steps by Day") + 
         xlab("Total Steps") + 
-        ylab("Frequency")
-```
-
-#### Mean and median
-
-```{r echo=TRUE}
-    dailysteps.mean <- mean(dailysteps$total_steps)
-    dailysteps.median <- median(dailysteps$total_steps)
+        ylab("Frequency") +
+        geom_vline(xintercept = dailysteps.median, color = "green", linetype = "longdash") +
+        geom_vline(xintercept = dailysteps.median, color = "orange", linetype = "dotted", size = 2)
 ```
 
 - `r sprintf("**Mean:** %.0f", dailysteps.mean)`
@@ -66,12 +65,17 @@ First we need to know the average of each 5-minute period in the data set averag
     ## for the moment at least continue ignoring NA values
     intervalsteps <- aggregate(steps ~ interval, data = activity, FUN = mean, na.action = na.omit)
     names(intervalsteps) <- c("interval", "mean_steps")
+
+    # also calculate the max of all intervales
+    intervalsteps.max <- intervalsteps[with(intervalsteps, mean_steps == max(mean_steps)), ]
 ```
 
 Plot the mean steps x interval to see the average daily activity pattern for the set. Add in some
-market lines to show main points in the day.
+marker lines to show main points in the day.
 
 ```{r echo=TRUE, fig.align='center'}
+    # odd factor creation is to ensure the ordering in the legend follows the clocktime order
+    # and not the 'natural' ordering of the strings.
     times <- data.frame(clocktime = factor(c("1", "2", "3", "4", "5", "6"), 
                                            labels = c("6AM", "9AM", "12PM", "3PM", "6PM", "9PM")),
                         interval = c(600, 900, 1200, 1500, 1800, 2100))
@@ -81,8 +85,14 @@ market lines to show main points in the day.
         ggtitle("Daily Activity Pattern") +
         xlab("Interval") +
         ylab("Average Steps (all days)") +
-        geom_vline(data = times, aes(xintercept = interval, color = clocktime), show_guide = TRUE)    
+        geom_vline(data = times, 
+                   aes(xintercept = interval, color = clocktime), 
+                   show_guide = TRUE) +
+        geom_point(data = intervalsteps.max, aes(x = interval, y = mean_steps), 
+                   color = "red", shape = "X", size = 5)
 ```
+
+`r sprintf("**Interval with max average steps**: %s (%.1f)", intervalsteps.max$interval, intervalsteps.max$mean_steps)`
 
 ## Imputing missing values
 
