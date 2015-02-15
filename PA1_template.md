@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -11,7 +6,8 @@ output:
 The data set is already neatly formatted, the only processing we will do is convert the date column
 into a proper `Date` object.
 
-```{r echo=TRUE}
+
+```r
     if (!file.exists("activity.csv")) {
         unzip("activity.zip")
     }
@@ -26,7 +22,8 @@ into a proper `Date` object.
 Calculation of the daily sums is as simple as aggregating the steps by date. Also compute the median
 and the average here.
 
-```{r echo=TRUE, message=FALSE}
+
+```r
     library(plyr)
 
     dailysteps <- aggregate(steps ~ date, data = activity, FUN = sum, na.action = na.omit)
@@ -40,7 +37,8 @@ and the average here.
 
 We'll use color to highlight concentration rather than overlay a density curve.
 
-```{r echo=TRUE, fig.align='center', message=FALSE}
+
+```r
     library(ggplot2)
 
     ggplot(dailysteps, aes(x = total_steps)) + 
@@ -53,14 +51,17 @@ We'll use color to highlight concentration rather than overlay a density curve.
         geom_vline(xintercept = dailysteps.median, color = "orange", linetype = "dotted", size = 2)
 ```
 
-- **Mean:** `r sprintf("%.0f", dailysteps.mean)`
-- **Median:** `r sprintf("%.0f", dailysteps.median)`
+<img src="PA1_template_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" style="display: block; margin: auto;" />
+
+- **Mean:** 10766
+- **Median:** 10765
 
 ## What is the average daily activity pattern?
 
 First we need to know the average of each 5-minute period in the data set averaged across all days.
 
-```{r echo=TRUE}
+
+```r
     ## for the moment at least continue ignoring NA values
     intervalsteps <- aggregate(steps ~ interval, data = activity, FUN = mean, na.action = na.omit)
     names(intervalsteps) <- c("interval", "mean_steps")
@@ -72,7 +73,8 @@ First we need to know the average of each 5-minute period in the data set averag
 Plot the mean steps x interval to see the average daily activity pattern for the set. Add in some
 marker lines to show main points in the day.
 
-```{r echo=TRUE, fig.align='center'}
+
+```r
     # odd factor creation is to ensure the ordering in the legend follows the clocktime order
     # and not the 'natural' ordering of the strings.
     times <- data.frame(clocktime = factor(c("1", "2", "3", "4", "5", "6"), 
@@ -91,7 +93,9 @@ marker lines to show main points in the day.
                        color = "red", shape = "X", size = 5)
 ```
 
-- **Interval with max average steps**: `r sprintf("%s (%.1f)", intervalsteps.max$interval, intervalsteps.max$mean_steps)`
+<img src="PA1_template_files/figure-html/unnamed-chunk-5-1.png" title="" alt="" style="display: block; margin: auto;" />
+
+- **Interval with max average steps**: 835 (206.2)
 
 ## Imputing missing values
 
@@ -100,17 +104,19 @@ marker lines to show main points in the day.
 There can only be NA values in the `steps` column since the other columns are fixed identifiers and
 not measurements.
 
-```{r echo=TRUE}
+
+```r
     # Find all the missing values
     activity.nas <- activity[is.na(activity$steps),]
     natotal <- nrow(activity.nas)
 ```
 
-- **Total number of NAs in the dataset:** `r natotal`
+- **Total number of NAs in the dataset:** 2304
 
 Is there any particular pattern to the NAs? More in a certain interval or more on certain days?
 
-```{r echo=TRUE, message=FALSE}
+
+```r
     # for convenience convert each NA to '1'
     activity.nas$steps <- 1
 
@@ -119,14 +125,19 @@ Is there any particular pattern to the NAs? More in a certain interval or more o
                               color = "black", fill = "steelblue") +
             coord_cartesian(ylim=c(0, 300)) +
             ggtitle("NA values by interval")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
+```r
     # and by date
     ggplot() + geom_histogram(data = activity.nas, aes(x = date), 
                               color = "black", fill = "steelblue") +
             coord_cartesian(ylim=c(0, 300)) +
             ggtitle("NA values by date")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-2.png) 
 
 #### Imputing
 
@@ -134,7 +145,8 @@ Based on the NA spred shown above the number of NAs in any one interval are some
 there are some dates for which the entire data is lost. In that case imputing based on the interval
 average seems the best course of action.
 
-```{r echo=TRUE, message=FALSE}
+
+```r
     library(Hmisc)
 
     # generate a 'complete' data set by imputing the missing values
@@ -152,7 +164,8 @@ average seems the best course of action.
 If we combine the `complete` and `dailysteps` data we can plot them side by side and see
 what difference the imputing made.
 
-```{r echo=TRUE}
+
+```r
     dailysteps.complete$type <- "na_imputed"
     dailysteps$type <- "na_filtered"
     combined <- rbind(dailysteps.complete, dailysteps)
@@ -166,19 +179,21 @@ what difference the imputing made.
           xlab = "Total Steps", ylab = "Frequency")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
 Imputing has increased, or left unchanged, estimates for total steps in every day. Which is exactly 
 as we would expect since the previous filtered data would be equivalent to imputing with '0' but we 
 chose to use the average instead. The average might be zero but cannot be a negative number.
 
 **Filtered**
 
-- Median: `r dailysteps.median`
-- Mean: `r sprintf("%.0f", dailysteps.mean)`
+- Median: 10765
+- Mean: 10766
 
 **Imputed**
 
-- Median: `r sprintf("%.0f", complete.median)`
-- Mean: `r sprintf("%.0f", complete.mean)`
+- Median: 10766
+- Mean: 10766
 
 Imputing has not significantly shifted either the mean or the median. This also makes sense:
 NA's were evenly distributed across intervals, which means each interval recieved the same number of
@@ -187,7 +202,8 @@ addition worked to pull the distribution of values for each interval further tow
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo=TRUE}
+
+```r
     ## Add week information to the dataset and extract weekdays vs weekends
     complete$day <- weekdays(complete$date)
     complete$weekday <- complete$day %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
@@ -211,6 +227,7 @@ addition worked to pull the distribution of values for each interval further tow
           main = "Activity Patterns",
           ylab = "Average Steps (all days)",
           xlab = "Interval")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
 
