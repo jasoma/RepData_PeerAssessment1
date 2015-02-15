@@ -129,5 +129,46 @@ Is there any particular pattern to the NAs? More in a certain interval or more o
 
 ```
 
+#### Imputing
+
+Based on the NA spred shown above the number of NAs in any one interval are somewhat consistant but
+there are some dates for which the entire data is lost. In that case imputing based on the interval
+average seems the best course of action.
+
+```{r echo=TRUE}
+    library(Hmisc)
+
+    # generate a 'complete' data set by imputing the missing values
+    complete <- activity
+    complete$steps <- with(complete, impute(steps, mean))
+
+    # recalculate the daily totals using the complete set
+    dailysteps.complete <- aggregate(steps ~ date, data = complete, FUN = sum)
+    names(dailysteps.complete) <- c("date", "total_steps")
+
+    complete.mean <- mean(dailysteps.complete$total_steps)
+    complete.median <- median(dailysteps.complete$total_steps)
+```
+
+If we combine the `complete` and `dailysteps` data we can plot them side by side and see
+what difference the imputing made.
+
+```{r echo=TRUE}
+    dailysteps.complete$type <- "na_imputed"
+    dailysteps$type <- "na_filtered"
+    combined <- rbind(dailysteps.complete, dailysteps)
+
+    qplot(total_steps, data = combined, 
+          geom = c("histogram"),
+          facets = .~type, 
+          fill=..count.., 
+          binwidth = 1000,
+          main = "Total Steps by Day: Impute vs Filtered",
+          xlab = "Total Steps", ylab = "Frequency")
+```
+
+Imputing has increased, or left unchanged, estimates for total steps in every day. Which is exactly 
+as we would expect since the previous filtered data would be equivalent to imputing with '0' but we 
+chose to use the average instead.
 
 ## Are there differences in activity patterns between weekdays and weekends?
