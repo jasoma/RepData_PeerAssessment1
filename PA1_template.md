@@ -53,8 +53,16 @@ We'll use color to highlight concentration rather than overlay a density curve.
 
 <img src="PA1_template_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" style="display: block; margin: auto;" />
 
-- **Mean:** 10766
-- **Median:** 10765
+```r
+    print(data.frame(calculation = c("Mean", "Median"), 
+                     value = c(dailysteps.mean, dailysteps.median)))
+```
+
+```
+##   calculation    value
+## 1        Mean 10766.19
+## 2      Median 10765.00
+```
 
 ## What is the average daily activity pattern?
 
@@ -95,7 +103,14 @@ marker lines to show main points in the day.
 
 <img src="PA1_template_files/figure-html/unnamed-chunk-5-1.png" title="" alt="" style="display: block; margin: auto;" />
 
-- **Interval with max average steps**: 835 (206.2)
+```r
+    print(intervalsteps.max)
+```
+
+```
+##     interval mean_steps
+## 104      835   206.1698
+```
 
 ## Imputing missing values
 
@@ -109,9 +124,13 @@ not measurements.
     # Find all the missing values
     activity.nas <- activity[is.na(activity$steps),]
     natotal <- nrow(activity.nas)
+
+    print(paste("Total number of NAs in the dataset:", natotal))
 ```
 
-- **Total number of NAs in the dataset:** 2304
+```
+## [1] "Total number of NAs in the dataset: 2304"
+```
 
 Is there any particular pattern to the NAs? More in a certain interval or more on certain days?
 
@@ -185,15 +204,22 @@ Imputing has increased, or left unchanged, estimates for total steps in every da
 as we would expect since the previous filtered data would be equivalent to imputing with '0' but we 
 chose to use the average instead. The average might be zero but cannot be a negative number.
 
-**Filtered**
+**Mean/Median Comparison**
 
-- Median: 10765
-- Mean: 10766
 
-**Imputed**
+```r
+    print(data.frame(calculation = c("mean", "median", "mean", "median"), 
+                     type = c("filtered", "filtered", "imputed", "imputed"), 
+                     value = c(dailysteps.mean, dailysteps.median, complete.mean, complete.median)))
+```
 
-- Median: 10766
-- Mean: 10766
+```
+##   calculation     type    value
+## 1        mean filtered 10766.19
+## 2      median filtered 10765.00
+## 3        mean  imputed 10766.19
+## 4      median  imputed 10766.19
+```
 
 Imputing has not significantly shifted either the mean or the median. This also makes sense:
 NA's were evenly distributed across intervals, which means each interval recieved the same number of
@@ -229,5 +255,5 @@ addition worked to pull the distribution of values for each interval further tow
           xlab = "Interval")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
 
