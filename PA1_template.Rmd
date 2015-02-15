@@ -36,22 +36,7 @@ Calculation of the daily sums is as simple as aggregating the steps by date.
 
 We'll use color to highlight concentration rather than overlay a density curve.
 
-```{r echo=FALSE, fig.align="center"}
-    ## This code block is hidden so that plot can appear above the code text
-    ## the block below is identical but not evaluated.
-
-    library(ggplot2)
-
-    ggplot(dailysteps, aes(x = total_steps)) + 
-        geom_histogram(binwidth = 1000, aes(fill = ..count..), color = "black") + 
-        scale_fill_gradient("count", low = "red", high = "steelblue") + 
-        geom_rug() + 
-        ggtitle("Total Steps by Day") + 
-        xlab("Total Steps") + 
-        ylab("Frequency")
-```
-
-```{r echo=TRUE, eval=FALSE}
+```{r echo=TRUE, fig.align='center'}
     library(ggplot2)
 
     ggplot(dailysteps, aes(x = total_steps)) + 
@@ -75,7 +60,29 @@ We'll use color to highlight concentration rather than overlay a density curve.
 
 ## What is the average daily activity pattern?
 
+First we need to know the average of each 5-minute period in the data set averaged across all days.
 
+```{r echo=TRUE}
+    ## for the moment at least continue ignoring NA values
+    intervalsteps <- aggregate(steps ~ interval, data = activity, FUN = mean, na.action = na.omit)
+    names(intervalsteps) <- c("interval", "mean_steps")
+```
+
+Plot the mean steps x interval to see the average daily activity pattern for the set. Add in some
+market lines to show main points in the day.
+
+```{r echo=TRUE, fig.align='center'}
+    times <- data.frame(clocktime = factor(c("1", "2", "3", "4", "5", "6"), 
+                                           labels = c("6AM", "9AM", "12PM", "3PM", "6PM", "9PM")),
+                        interval = c(600, 900, 1200, 1500, 1800, 2100))
+
+    ggplot(intervalsteps, aes(x = interval, y = mean_steps)) + 
+        geom_line() +
+        ggtitle("Daily Activity Pattern") +
+        xlab("Interval") +
+        ylab("Average Steps (all days)") +
+        geom_vline(data = times, aes(xintercept = interval, color = clocktime), show_guide = TRUE)    
+```
 
 ## Imputing missing values
 
