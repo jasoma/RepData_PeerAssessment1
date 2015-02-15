@@ -109,7 +109,25 @@ not measurements.
 
 - **Total number of NAs in the dataset:** `r natotal`
 
-#### Imputing the missing values
+Is there any particular pattern to the NAs? More in a certain interval or more on certain days?
+
+```{r echo=TRUE, message=FALSE}
+    # for convenience convert each NA to '1'
+    activity.nas$steps <- 1
+
+    # NA's by interval
+    ggplot() + geom_histogram(data = activity.nas, aes(x = interval), 
+                              color = "black", fill = "steelblue") +
+            coord_cartesian(ylim=c(0, 300)) +
+            ggtitle("NA values by interval")
+
+    # and by date
+    ggplot() + geom_histogram(data = activity.nas, aes(x = date), 
+                              color = "black", fill = "steelblue") +
+            coord_cartesian(ylim=c(0, 300)) +
+            ggtitle("NA values by date")
+
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
