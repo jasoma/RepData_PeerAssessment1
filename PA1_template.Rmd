@@ -54,8 +54,8 @@ We'll use color to highlight concentration rather than overlay a density curve.
         geom_vline(xintercept = dailysteps.median, color = "orange", linetype = "dotted", size = 2)
 ```
 
-- `r sprintf("**Mean:** %.0f", dailysteps.mean)`
-- `r sprintf("**Median:** %.0f", dailysteps.median)`
+- **Mean:** `r sprintf("%.0f", dailysteps.mean)`
+- **Median:** `r sprintf("%.0f", dailysteps.median)`
 
 ## What is the average daily activity pattern?
 
@@ -81,21 +81,35 @@ marker lines to show main points in the day.
                         interval = c(600, 900, 1200, 1500, 1800, 2100))
 
     ggplot(intervalsteps, aes(x = interval, y = mean_steps)) + 
-        geom_line() +
-        ggtitle("Daily Activity Pattern") +
-        xlab("Interval") +
-        ylab("Average Steps (all days)") +
-        geom_vline(data = times, 
-                   aes(xintercept = interval, color = clocktime), 
-                   show_guide = TRUE) +
-        geom_point(data = intervalsteps.max, aes(x = interval, y = mean_steps), 
-                   color = "red", shape = "X", size = 5)
+            geom_line() +
+            ggtitle("Daily Activity Pattern") +
+            xlab("Interval") +
+            ylab("Average Steps (all days)") +
+            geom_vline(data = times, 
+                       aes(xintercept = interval, color = clocktime), 
+                       show_guide = TRUE) +
+            geom_point(data = intervalsteps.max, aes(x = interval, y = mean_steps), 
+                       color = "red", shape = "X", size = 5)
 ```
 
-`r sprintf("**Interval with max average steps**: %s (%.1f)", intervalsteps.max$interval, intervalsteps.max$mean_steps)`
+- **Interval with max average steps**: `r sprintf("%s (%.1f)", intervalsteps.max$interval, intervalsteps.max$mean_steps)`
 
 ## Imputing missing values
 
+#### NA Density
+
+There can only be NA values in the `steps` column since the other columns are fixed identifiers and
+not measurements.
+
+```{r echo=TRUE}
+    # Find all the missing values
+    activity.nas <- activity[is.na(activity$steps),]
+    natotal <- nrow(activity.nas)
+```
+
+- **Total number of NAs in the dataset:** `r natotal`
+
+#### Imputing the missing values
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
