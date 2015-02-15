@@ -26,7 +26,7 @@ into a proper `Date` object.
 Calculation of the daily sums is as simple as aggregating the steps by date. Also compute the median
 and the average here.
 
-```{r echo=TRUE}
+```{r echo=TRUE, message=FALSE}
     library(plyr)
 
     dailysteps <- aggregate(steps ~ date, data = activity, FUN = sum, na.action = na.omit)
@@ -40,7 +40,7 @@ and the average here.
 
 We'll use color to highlight concentration rather than overlay a density curve.
 
-```{r echo=TRUE, fig.align='center'}
+```{r echo=TRUE, fig.align='center', message=FALSE}
     library(ggplot2)
 
     ggplot(dailysteps, aes(x = total_steps)) + 
@@ -135,7 +135,7 @@ Based on the NA spred shown above the number of NAs in any one interval are some
 there are some dates for which the entire data is lost. In that case imputing based on the interval
 average seems the best course of action.
 
-```{r echo=TRUE}
+```{r echo=TRUE, message=FALSE}
     library(Hmisc)
 
     # generate a 'complete' data set by imputing the missing values
@@ -169,6 +169,21 @@ what difference the imputing made.
 
 Imputing has increased, or left unchanged, estimates for total steps in every day. Which is exactly 
 as we would expect since the previous filtered data would be equivalent to imputing with '0' but we 
-chose to use the average instead.
+chose to use the average instead. The average might be zero but cannot be a negative number.
+
+**Filtered**
+
+- Median: `r dailysteps.median`
+- Mean: `r sprintf("%.0f", dailysteps.mean)`
+
+**Imputed**
+
+- Median: `r sprintf("%.0f", complete.median)`
+- Mean: `r sprintf("%.0f", complete.mean)`
+
+Imputing has not significantly shifted either the mean or the median. This also makes sense:
+NA's were evenly distributed across intervals, which means each interval recieved the same number of
+generated values. The avergae of all values for an interval was used as the imputed value meaning the
+addition worked to pull the distribution of values for each interval further towards it's existing mean.
 
 ## Are there differences in activity patterns between weekdays and weekends?
